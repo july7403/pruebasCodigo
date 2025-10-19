@@ -1,0 +1,50 @@
+[debug] > Exec(early(addDefaultCommands), None, None)
+[debug] > Exec(addDefaultCommands, None, None)
+[debug] > Exec(early(initialize), None, None)
+[debug] > Exec(initialize, None, None)
+[debug] > Exec(boot, None, None)
+[debug] > Exec(writeSbtVersion, None, None)
+[debug] > Exec(reload, None, None)
+[debug] > Exec(sbtStashOnFailure, None, None)
+[debug] > Exec(onFailure loadFailed, None, None)
+[debug] > Exec(loadp, None, None)
+[info] welcome to sbt 1.11.2 (Ubuntu Java 21.0.8)
+[debug] Load.defaultLoad until apply took 718.085205ms
+[debug]           Load.loadUnit: plugins took 607.583666ms
+[debug]           Load.loadUnit: defsScala took 0.536346ms
+[debug] [Loading] Scanning directory /home/yuyita/TP1/Tp1_Paradigmas/project
+[debug] [Loading] Found non-root projects 
+[debug] [Loading] Done in /home/yuyita/TP1/Tp1_Paradigmas/project, returning: ()
+[debug] deducing auto plugins based on known facts Set(Atom(sbt.plugins.CorePlugin)) and clauses Clauses(Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.IvyPlugin)))
+[debug] Clause(Atom(sbt.ScriptedPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.SbtPlugin),Set(Atom(sbt.ScriptedPlugin)))
+[debug] Clause(Atom(sbt.plugins.SemanticdbPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.JUnitXmlReportPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.MiniDependencyTreePlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.IvyPlugin)))
+[debug] Clause(Atom(sbt.plugins.IvyPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.SemanticdbPlugin)))
+[debug] Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.JUnitXmlReportPlugin)))
+[debug] Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.Giter8TemplatePlugin)))
+[debug] Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.MiniDependencyTreePlugin))))
+[debug]   :: deduced result: Matched(sbt.plugins.CorePlugin,sbt.plugins.Giter8TemplatePlugin,sbt.plugins.IvyPlugin,sbt.plugins.JvmPlugin,sbt.plugins.MiniDependencyTreePlugin,sbt.plugins.JUnitXmlReportPlugin,sbt.plugins.SemanticdbPlugin)
+[debug] Plugins.deducer#function took 115.243137 ms
+[debug]               Load.resolveProject(tp1_paradigmas-build) took 3149.554438ms
+[debug]             Load.loadTransitive: finalizeProject(Project(id tp1_paradigmas-build, base: /home/yuyita/TP1/Tp1_Paradigmas/project, plugins: List(<none>))) took 3373.181283ms
+[debug] [Loading] Done in /home/yuyita/TP1/Tp1_Paradigmas/project, returning: (tp1_paradigmas-build)
+[debug]           Load.loadUnit: loadedProjectsRaw took 3525.570148ms
+[debug]           Load.loadUnit: cleanEvalClasses took 0.701795ms
+[debug]         Load.loadUnit(file:/home/yuyita/TP1/Tp1_Paradigmas/project/, ...) took 4214.864671ms
+[debug]       Load.apply: load took 5881.045402ms
+[debug]       Load.apply: resolveProjects took 38.225505ms
+[debug]       Load.apply: finalTransforms took 834.576339ms
+[debug]       Load.apply: config.delegates took 306.91519ms
+[debug]       Load.apply: Def.make(settings)... took 8027.639659ms
+[debug]       Load.apply: structureIndex took 3083.103065ms
+[debug]       Load.apply: mkStreams took 6.228271ms
+[info] loading project definition from /home/yuyita/TP1/Tp1_Paradigmas/project
+[debug] Running task... Cancel: Signal, check cycles: false, forcegc: true
+[debug]     Load.loadUnit: plugins took 39996.013621ms
+[debug]     Load.loadUnit: defsScala took 0.020133ms
+[debug] [Loading] Scanning directory /home/yuyita/TP1/Tp1_Paradigmas
+[debug]       Load.loadUnit: mkEval took 1203.884363ms

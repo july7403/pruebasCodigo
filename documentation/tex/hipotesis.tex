@@ -1,0 +1,14 @@
+\section{Hipótesis}
+
+Durante el desarrollo del TP se establecieron ciertas hipótesis con el objetivo de delimitar el alcance del sistema y facilitar su implementación. 
+
+Se asumió que:
+\begin{itemize}
+    \item Las bases de conocimiento están bien formadas y que las cláusulas se expresan de manera sintacticamente correcta.
+    \item Los hechos y reglas ingresados no contienen recursión infinita ni construcciones que impidan la finalización del proceso de inferencia.
+    \item La unificación implementada es suficiente para resolver los objetivos propuestos, sin necesidad de extenderla a operadores aritméticos o estructuras de datos complejas.
+    \item Las variables son locales a cada consulta y que no se requiere un manejo de entornos anidados o contextos múltiples.
+    \item Mundo cerrado: toda consulta que no pueda ser unificada o resuelta se considera falsa.
+    \item Por ultimo, se consideró que la interacción con el usuario, ya sea por consola o interfaz, no afecta el funcionamiento lógico del motor y se limita a la carga y visualización de resultados.
+    
+\end{itemize}

@@ -1,0 +1,20 @@
+% 1. Prueba de Aritmética Simple (add/3)
+suma(5,8,X)
+% 2. Prueba de Aritmética Compleja (sub/3)
+resta(30, 7, Z).
+% 3. Prueba de neq
+neq(15,13)
+% 5. Prueba de Comparación (gt/2)
+gt(6,5)
+gt(10, 5).
+gt(10, 10).
+% 6. Prueba de Comparación (eq/2)
+eq(mult(2, 5), 10)
+eq(mult(2, 5), add(5,5))
+% 7. Prueba de Unificación en Reglas
+multiplicador(3, 4, ResM).
+sumador(10, 5, ResS).
+% 8. Prueba de Unificación Encadenada (la más importante)
+numeroFavorito(juan, X), sumador(X, 7, R).
+% 10. Consulta simple a la base de hechos
+edad(maria, A).

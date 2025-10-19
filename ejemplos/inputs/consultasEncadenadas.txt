@@ -1,0 +1,8 @@
+%vemos algunas consultas encadenadas para testear
+%consultas independientes
+padre(X,maria) , edad(Y,18).
+padre(juan, jose) , padre(juan, maria).
+%consultas relacionadas
+padre(X, Y), edad(Y, 20).
+edad(X, E), gt(E, 40)
+padre(juan, X), mayorEdad(X)

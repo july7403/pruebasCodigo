@@ -1,0 +1,100 @@
+[debug] > Exec(early(addDefaultCommands), None, None)
+[debug] > Exec(addDefaultCommands, None, None)
+[debug] > Exec(early(initialize), None, None)
+[debug] > Exec(initialize, None, None)
+[debug] > Exec(boot, None, None)
+[debug] > Exec(writeSbtVersion, None, None)
+[debug] > Exec(reload, None, None)
+[debug] > Exec(sbtStashOnFailure, None, None)
+[debug] > Exec(onFailure loadFailed, None, None)
+[debug] > Exec(loadp, None, None)
+[info] welcome to sbt 1.11.2 (Ubuntu Java 21.0.8)
+[debug] Load.defaultLoad until apply took 652.039465ms
+[debug]           Load.loadUnit: plugins took 448.18601ms
+[debug]           Load.loadUnit: defsScala took 0.623207ms
+[debug] [Loading] Scanning directory /home/yuyita/TP1/Tp1_Paradigmas/project
+[debug] [Loading] Found non-root projects 
+[debug] [Loading] Done in /home/yuyita/TP1/Tp1_Paradigmas/project, returning: ()
+[debug] deducing auto plugins based on known facts Set(Atom(sbt.plugins.CorePlugin)) and clauses Clauses(Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.IvyPlugin)))
+[debug] Clause(Atom(sbt.ScriptedPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.SbtPlugin),Set(Atom(sbt.ScriptedPlugin)))
+[debug] Clause(Atom(sbt.plugins.SemanticdbPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.JUnitXmlReportPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.MiniDependencyTreePlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.IvyPlugin)))
+[debug] Clause(Atom(sbt.plugins.IvyPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.SemanticdbPlugin)))
+[debug] Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.JUnitXmlReportPlugin)))
+[debug] Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.Giter8TemplatePlugin)))
+[debug] Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.MiniDependencyTreePlugin))))
+[debug]   :: deduced result: Matched(sbt.plugins.CorePlugin,sbt.plugins.Giter8TemplatePlugin,sbt.plugins.IvyPlugin,sbt.plugins.JvmPlugin,sbt.plugins.MiniDependencyTreePlugin,sbt.plugins.JUnitXmlReportPlugin,sbt.plugins.SemanticdbPlugin)
+[debug] Plugins.deducer#function took 134.078087 ms
+[debug]               Load.resolveProject(tp1_paradigmas-build) took 2798.528726ms
+[debug]             Load.loadTransitive: finalizeProject(Project(id tp1_paradigmas-build, base: /home/yuyita/TP1/Tp1_Paradigmas/project, plugins: List(<none>))) took 3029.879861ms
+[debug] [Loading] Done in /home/yuyita/TP1/Tp1_Paradigmas/project, returning: (tp1_paradigmas-build)
+[debug]           Load.loadUnit: loadedProjectsRaw took 3177.962829ms
+[debug]           Load.loadUnit: cleanEvalClasses took 3.468434ms
+[debug]         Load.loadUnit(file:/home/yuyita/TP1/Tp1_Paradigmas/project/, ...) took 3672.52326ms
+[debug]       Load.apply: load took 5102.401484ms
+[debug]       Load.apply: resolveProjects took 34.502028ms
+[debug]       Load.apply: finalTransforms took 859.068657ms
+[debug]       Load.apply: config.delegates took 243.196879ms
+[debug]       Load.apply: Def.make(settings)... took 4861.400919ms
+[debug]       Load.apply: structureIndex took 887.322331ms
+[debug]       Load.apply: mkStreams took 2.210774ms
+[info] loading project definition from /home/yuyita/TP1/Tp1_Paradigmas/project
+[debug] Running task... Cancel: Signal, check cycles: false, forcegc: true
+[debug]     Load.loadUnit: plugins took 21683.717066ms
+[debug]     Load.loadUnit: defsScala took 0.01855ms
+[debug] [Loading] Scanning directory /home/yuyita/TP1/Tp1_Paradigmas
+[debug]       Load.loadUnit: mkEval took 364.251106ms
+[debug] [Loading] Found root project root w/ remaining 
+[debug] deducing auto plugins based on known facts Set(Atom(sbt.plugins.CorePlugin)) and clauses Clauses(Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.IvyPlugin)))
+[debug] Clause(Atom(sbt.ScriptedPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.SbtPlugin),Set(Atom(sbt.ScriptedPlugin)))
+[debug] Clause(Atom(sbt.plugins.SemanticdbPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.JUnitXmlReportPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.MiniDependencyTreePlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.IvyPlugin)))
+[debug] Clause(Atom(sbt.plugins.IvyPlugin),Set(Atom(sbt.plugins.JvmPlugin)))
+[debug] Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.SemanticdbPlugin)))
+[debug] Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.JUnitXmlReportPlugin)))
+[debug] Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.Giter8TemplatePlugin)))
+[debug] Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.MiniDependencyTreePlugin))))
+[debug]   :: deduced result: Matched(sbt.plugins.CorePlugin,sbt.plugins.Giter8TemplatePlugin,sbt.plugins.IvyPlugin,sbt.plugins.JvmPlugin,sbt.plugins.MiniDependencyTreePlugin,sbt.plugins.JUnitXmlReportPlugin,sbt.plugins.SemanticdbPlugin)
+[debug] Plugins.deducer#function took 45.078763 ms
+[info] loading settings for project root from build.sbt...
+[debug]         Load.resolveProject(root) took 31.911446ms
+[debug]       Load.loadTransitive: finalizeProject(Project(id root, base: /home/yuyita/TP1/Tp1_Paradigmas, plugins: List(<none>))) took 85.303513ms
+[debug] [Loading] Done in /home/yuyita/TP1/Tp1_Paradigmas, returning: (root)
+[debug]     Load.loadUnit: loadedProjectsRaw took 21702.78375ms
+[debug]     Load.loadUnit: cleanEvalClasses took 20.457995ms
+[debug]   Load.loadUnit(file:/home/yuyita/TP1/Tp1_Paradigmas/, ...) took 43423.8217ms
+[debug] Load.apply: load took 43583.871401ms
+[debug] Load.apply: resolveProjects took 1.601959ms
+[debug] Load.apply: finalTransforms took 185.145478ms
+[debug] Load.apply: config.delegates took 116.819576ms
+[debug] Load.apply: Def.make(settings)... took 2916.8586ms
+[debug] Load.apply: structureIndex took 552.914763ms
+[debug] Load.apply: mkStreams took 0.004723ms
+[info] set current project to Scala-template (in build file:/home/yuyita/TP1/Tp1_Paradigmas/)
+[debug] > Exec(sbtPopOnFailure, None, None)
+[debug] > Exec(resumeFromFailure, None, None)
+[debug] > Exec(notifyUsersAboutShell, None, None)
+[debug] > Exec(iflast shell, None, None)
+[debug] > Exec(run ejemplos/programas/built-ins.pl ejemplos/inputs/built-ins.txt, None, None)
+[debug] Evaluating tasks: Compile / run
+[debug] Running task... Cancel: Signal, check cycles: false, forcegc: true
+[info] compiling 1 Scala source to /home/yuyita/TP1/Tp1_Paradigmas/target/scala-3.3.6/classes ...
+[warn] -- [E121] Pattern Match Warning: /home/yuyita/TP1/Tp1_Paradigmas/src/main/scala/Engine.scala:170:15 
+[warn] 170 |          case _ => Nil
+[warn]     |               ^
+[warn]     |Unreachable case except for null (if this is intentional, consider writing case null => instead).
+[warn] -- [E121] Pattern Match Warning: /home/yuyita/TP1/Tp1_Paradigmas/src/main/scala/Engine.scala:216:11 
+[warn] 216 |      case other => other.toString
+[warn]     |           ^^^^^
+[warn]     |Unreachable case except for null (if this is intentional, consider writing case null => instead).
+[warn] Canceling execution...
+[warn] two warnings found
+[info] done compiling
+[info] compiling 1 Scala source to /home/yuyita/TP1/Tp1_Paradigmas/target/scala-3.3.6/classes ...
