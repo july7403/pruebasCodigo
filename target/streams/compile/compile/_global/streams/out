@@ -1,9 +1,10 @@
-[warn] -- [E121] Pattern Match Warning: /home/yuyita/TP1/Tp1_Paradigmas/src/main/scala/Engine.scala:169:15 
-[warn] 169 |          case _ => Nil
-[warn]     |               ^
+[warn] -- [E121] Pattern Match Warning: /home/yuyita/pruebas de codigo/pruebasCodigo/src/main/scala/Engine.scala:200:17 
+[warn] 200 |            case _ => (solucionesAcumuladas, contextoActual)
+[warn]     |                 ^
 [warn]     |Unreachable case except for null (if this is intentional, consider writing case null => instead).
-[warn] -- [E121] Pattern Match Warning: /home/yuyita/TP1/Tp1_Paradigmas/src/main/scala/Engine.scala:215:11 
-[warn] 215 |      case other => other.toString
-[warn]     |           ^^^^^
+[warn] -- [E121] Pattern Match Warning: /home/yuyita/pruebas de codigo/pruebasCodigo/src/main/scala/Engine.scala:277:11 
+[warn] 277 |      case otro => otro.toString
+[warn]     |           ^^^^
 [warn]     |Unreachable case except for null (if this is intentional, consider writing case null => instead).
+[warn] two warnings found
 [warn] two warnings found

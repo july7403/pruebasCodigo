@@ -1,37 +1,36 @@
 import classes.*
 
-object UnificacionError extends Exception
-
 type Sustituciones = Map[Variable, Expresion]
 
-def unificar(expr1: Expresion, expr2: Expresion, sustitucion: Sustituciones): Sustituciones = {
+// Unificar dos expresiones 
+def unificar(expresion1: Expresion, expresion2: Expresion, sustitucion: Sustituciones): Option[Sustituciones] = {
 
-  def resolver(e: Expresion): Expresion = e match {
-    case v: Variable if sustitucion.contains(v) => resolver(sustitucion(v))
-    case Predicado(nombre, args) => Predicado(nombre, args.map(resolver))
+  def resolverExpresion(exp: Expresion): Expresion = exp match {
+    case variable: Variable => sustitucion.get(variable).map(resolverExpresion).getOrElse(variable)
+    case Predicado(nombre, argumentos) => Predicado(nombre, argumentos.map(resolverExpresion))
     case otro => otro
   }
 
-  val e1 = resolver(expr1)
-  val e2 = resolver(expr2)
+  val expr1Resuelta = resolverExpresion(expresion1)
+  val expr2Resuelta = resolverExpresion(expresion2)
 
-  (e1, e2) match {
-    case _ if e1 == e2 => sustitucion
-    case (v: Variable, otraExpr) => sustitucion.updated(v, otraExpr)
-    case (otraExpr, v: Variable) => sustitucion.updated(v, otraExpr)
-    case (Predicado(n1, args1), Predicado(n2, args2))
-        if n1 == n2 && args1.length == args2.length =>
-            unificarListas(args1, args2, sustitucion)
-    case _ => throw UnificacionError
+  (expr1Resuelta, expr2Resuelta) match {
+    case _ if expr1Resuelta == expr2Resuelta => Some(sustitucion)
+    case (variable: Variable, otraExpresion) => Some(sustitucion.updated(variable, otraExpresion))
+    case (otraExpresion, variable: Variable) => Some(sustitucion.updated(variable, otraExpresion))
+    case (Predicado(nombre1, args1), Predicado(nombre2, args2)) if nombre1 == nombre2 && args1.length == args2.length =>
+      unificarListas(args1, args2, sustitucion)
+    case _ => None
   }
 }
 
-private def unificarListas(l1: List[Expresion], l2: List[Expresion], sustitucionInicial: Sustituciones): Sustituciones = {
-  (l1, l2) match {
-    case (Nil, Nil) => sustitucionInicial
-    case (x :: xs, y :: ys) =>
-      val nuevasSustituciones = unificar(x, y, sustitucionInicial)
-      unificarListas(xs, ys, nuevasSustituciones)
-    case _ => throw UnificacionError
+private def unificarListas(lista1: List[Expresion], lista2: List[Expresion], sustitucionInicial: Sustituciones): Option[Sustituciones] = {
+  (lista1, lista2) match {
+    case (Nil, Nil) => Some(sustitucionInicial)
+    case (cabeza1 :: cola1, cabeza2 :: cola2) =>
+      unificar(cabeza1, cabeza2, sustitucionInicial).flatMap { sustitucionesActualizadas =>
+        unificarListas(cola1, cola2, sustitucionesActualizadas)
+      }
+    case _ => None
   }
 }
