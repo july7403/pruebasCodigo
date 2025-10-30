@@ -1,5 +1,0 @@
-fibo(7, 13)
-fibo(2, 1)
-fibo(0, X)
-fibo(1, Y)
-fibo(7, X)

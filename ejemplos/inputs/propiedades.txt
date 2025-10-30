@@ -1,3 +1,0 @@
-propiedad(Z,C)
-propiedad(casa, rojo).
-propiedad(arbol, Y).
