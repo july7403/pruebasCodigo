@@ -8,6 +8,7 @@ public class Celda {
     private Integer y;
     private String nombre;
     private boolean esTransitable;
+    private boolean unidadOculta;
     private EfectoTerreno efectoTerreno;
     private Unidad unidadActaul = null;
 
@@ -20,7 +21,7 @@ public class Celda {
     }
 
     public boolean estaVacia() {
-        return this.unidadActaul != null;
+        return this.unidadActaul == null; //fix: deberia ser true si esta vacio
     }
     public Unidad getUnidadActaul(){
         return this.unidadActaul;
@@ -49,4 +50,8 @@ public class Celda {
     public boolean esTransitable(){return this.esTransitable;}
     public Integer getX(){return this.x;}
     public Integer getY(){return this.y;}
+    public String getColor(){
+        return this.efectoTerreno.getColorFondo();
+    }
+    public boolean UnidadOculta(){return this.unidadOculta;}
 }

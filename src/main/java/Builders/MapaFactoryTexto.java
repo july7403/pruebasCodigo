@@ -46,7 +46,7 @@ public class MapaFactoryTexto implements MapaFactory{
             return new Celda[0][0];
         }
         int numeroFilas = filas.size();
-        int numeroColumnas = filas.getFirst().length;
+        int numeroColumnas = filas.get(0).length;
         Celda[][] matriz = new Celda[numeroFilas][numeroColumnas];
 
         for (int i = 0 ; i < numeroFilas; i++){

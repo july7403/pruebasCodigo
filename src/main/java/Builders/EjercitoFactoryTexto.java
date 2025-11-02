@@ -3,7 +3,7 @@ package Builders;
 import EquipamientoPackage.Baculo;
 import EquipamientoPackage.Equipamiento;
 import Jugador.Jugador;
-
+import EquipamientoPackage.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,8 +46,28 @@ public class EjercitoFactoryTexto implements IEjercitoFactory{
     }
 
     private List<Jugador> ensamblarJugadores(Map<String, List<Unidad>> unidadesPorJugador) {
-        //TODO:
-        return new ArrayList<Jugador>();
+        List<Jugador> jugadores = new ArrayList<>();
+
+        String[] coloresDisponibles = {"Rojo", "Azul", "Verde", "Amarillo", "Negro", "Blanco"};
+        int indiceColor = 0;
+
+        for (Map.Entry<String, List<Unidad>> entry : unidadesPorJugador.entrySet()) {
+            String nombreJugador = entry.getKey().trim();
+            List<Unidad> unidadesJugador = entry.getValue();
+
+            String colorAsignado = coloresDisponibles[indiceColor % coloresDisponibles.length];
+            indiceColor++;
+
+            Jugador jugador = new Jugador(nombreJugador, unidadesJugador, colorAsignado);
+            jugadores.add(jugador);
+        }
+
+        // Validación mínima
+        if (jugadores.size() < 2) {
+            throw new IllegalArgumentException("Debe haber al menos dos jugadores definidos en el archivo de ejército.");
+        }
+
+        return jugadores;
     }
 
     private Unidad crearUnidad(String[] datos) {
@@ -67,9 +87,28 @@ public class EjercitoFactoryTexto implements IEjercitoFactory{
         return nuevaUnidad(datos[0],id,vida,estadisticasUnidad,arma);
     }
 
-    private Equipamiento crearEquipamiento(String dato, String dato1) {
-        //TODO:
-        return new Baculo();
+    private Equipamiento crearEquipamiento(String nombreArma, String tipoEstrategia) {
+        nombreArma = nombreArma.trim().toUpperCase();
+        tipoEstrategia = tipoEstrategia.trim().toUpperCase();
+
+        switch (nombreArma) {
+            case "ESPADA":
+            case "LANZA":
+            case "HACHA":
+                return new ArmaCuerpoACuerpo(nombreArma, 10, 20); // atk base 10, 20 usos
+
+            case "BACULO":
+                return new Baculo("Báculo de Curación", 3, 15, new EstrategiaCuracionHP());
+
+            case "GRIMORIO":
+                if (tipoEstrategia.equals("D_MAGICO")) {
+                    return new Grimorio("Grimorio de Fuego", 3, 12, 15);
+                } else {
+                    return new Grimorio("Grimorio Básico", 3, 10, 15);
+                }
+            default:
+                throw new IllegalArgumentException("Tipo de equipamiento no reconocido: " + nombreArma);
+        }
     }
 
     private Unidad nuevaUnidad(String tipoUnidad, Integer id,Integer vida, Estadistica estadisticasUnidad, Equipamiento arma) {

@@ -23,7 +23,7 @@ public class ControladorTurnosTradicional implements ControladorTurnos {
 
     private Integer getJugadorInicial(List<Jugador> jugadores) {
         Random random = new Random();
-        return random.nextInt(this.jugadores.size());
+        return random.nextInt(jugadores.size());
     }
 
     private boolean validarJugadores(List<Jugador> jugadores){
