@@ -1,8 +1,18 @@
 package EfectosTerreno;
 
-public class EfectoPantano implements EfectoTerreno{
-    @Override
-    public String getColorFondo() {
-        return "\\u001B[43m"; //amarillo, verde oscuro
+import UnidadPackage.Unidad;
+
+public final class EfectoPantano extends EfectoBase {
+
+    public EfectoPantano() {
+        super(true);
     }
+
+    @Override
+    public int movimientoEfectivo(Unidad u, int movBase) {
+        return 1;
+    }
+
+
+
 }

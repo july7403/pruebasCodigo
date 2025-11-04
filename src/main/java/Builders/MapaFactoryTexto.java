@@ -99,7 +99,7 @@ public class MapaFactoryTexto implements MapaFactory{
                 esTransitable = false;
                 efectoTerreno = new EfectoAcantilado();
                 break;
-            case "Agua": //Mar,Lago,Rio,etc.
+            case "AGU": //Mar,Lago,Rio,etc.
                 nombre = "Agua";
                 esTransitable = false;
                 efectoTerreno = new EfectoAgua();

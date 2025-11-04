@@ -22,15 +22,25 @@ public abstract class Equipamiento {
         this.estrategia = estrategia;
     }
 
+    public boolean estaRoto() {
+        return usosRestantes <= 0;
+    }
 
+    //atacar o sanar
     public void usar(Unidad atacante, Unidad objetivo) {
-        //if esta roto pero quiero encontrar otra logica que no sea if
+        if (estaRoto()) {
+            throw new IllegalStateException("El equipamiento está roto");
+        }
         estrategia.ejecutar(atacante, objetivo);
         usosRestantes--;
     }
 
-    public boolean estaRoto() {
-        return usosRestantes <= 0;
+    public Integer getAtk() {
+        return atk;
+    }
+
+    public Integer getMgc() {
+        return mgc;
     }
 
 }

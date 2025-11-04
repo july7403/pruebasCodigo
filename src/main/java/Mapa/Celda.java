@@ -50,8 +50,12 @@ public class Celda {
     public boolean esTransitable(){return this.esTransitable;}
     public Integer getX(){return this.x;}
     public Integer getY(){return this.y;}
-    public String getColor(){
-        return this.efectoTerreno.getColorFondo();
-    }
+//    public String getColor(){
+//        return this.efectoTerreno.getColorFondo();
+//    }
     public boolean UnidadOculta(){return this.unidadOculta;}
+
+    public String getColor() {
+        return "color";
+    }
 }

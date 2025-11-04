@@ -9,7 +9,10 @@ public class Baculo extends Equipamiento {
                 0, // No tiene ATK
                 0, // No tiene MGC
                 usosMaximos,
-                new EstrategiaCuracionHP() //habría que crear mas estrategias
+                new EstrategiaCuracionHP()
 
         );
-    }}
+    }
+
+
+}

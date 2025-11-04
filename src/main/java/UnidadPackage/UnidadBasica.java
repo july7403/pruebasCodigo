@@ -6,4 +6,9 @@ public class UnidadBasica extends Unidad {
     public UnidadBasica(Integer id, Integer vida, Estadistica estadisticas, Equipamiento equipamiento) {
         super(id, vida, estadisticas, equipamiento);
     }
+
+    @Override
+    public String getDisplay() {
+        return "U"; //U de unidad basica
+    }
 }

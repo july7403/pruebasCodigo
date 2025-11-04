@@ -8,8 +8,9 @@ public class Grimorio extends Equipamiento {
                 0, // No tiene ATK físico
                 mgc,
                 usosMaximos,
-                new EstrategiaCuracionHP()
+                new EstrategiaMagica()
         );
     }
+
 
 }

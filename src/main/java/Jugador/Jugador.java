@@ -22,4 +22,15 @@ public class Jugador {
     public List<Unidad> getUnidades() {
         return unidades;
     }
+    public boolean tieneEstaUnidad(Unidad unidad){
+        return this.unidades.contains(unidad);
+    }
+
+    public String contarUnidadesVivas() {
+        return String.valueOf(this.unidades.size());
+    }
+
+    public void setNombre(String nuevoNombre) {
+        this.nombre = nuevoNombre;
+    }
 }

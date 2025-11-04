@@ -1,8 +1,19 @@
 package EfectosTerreno;
 
-public class EfectoBosque implements EfectoTerreno{
-    @Override
-    public String getColorFondo() {
-        return "\\u001B[42m"; //Verde
+import UnidadPackage.Unidad;
+
+public class EfectoBosque extends EfectoBase{
+    public EfectoBosque() {
+        super(true);
     }
+
+    @Override
+    public int modificarAtk(Unidad u) {
+        return 1;
+    }
+    public int modificarDef(Unidad u) {
+        return 1;
+    }
+
+
 }

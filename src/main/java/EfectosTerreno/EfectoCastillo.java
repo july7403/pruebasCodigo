@@ -1,8 +1,23 @@
 package EfectosTerreno;
 
-public class EfectoCastillo implements EfectoTerreno{
+import UnidadPackage.Unidad;
+
+public class EfectoCastillo extends EfectoBase{
+    public EfectoCastillo() {
+        super(true);
+    }
+
     @Override
-    public String getColorFondo() {
-        return "\\u001B[46m"; //Azul claro
+    public int modificarDef(Unidad u) {
+        return 1;
+    }
+
+    @Override
+    public void aplicarEfectoFinalTurno(Unidad u) {
+        super.aplicarEfectoFinalTurno(u);
+    }
+    @Override
+    public int bonusDefensaTurnoRival(Unidad u, boolean esTurnoDelRival) {
+        return esTurnoDelRival ? 2 : 0;
     }
 }

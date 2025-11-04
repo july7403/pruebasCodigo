@@ -115,7 +115,7 @@ public class EjercitoFactoryTexto implements IEjercitoFactory{
         switch (tipoUnidad.trim().toUpperCase()){
             case "LORD":
                 return new Lord(id,vida,estadisticasUnidad,arma);
-            case "BASICA":
+            case "UNIDAD_BASICA":
                 return new UnidadBasica(id,vida,estadisticasUnidad,arma);
             default:
                 throw new IllegalArgumentException("Tipo de unidad no registrado");

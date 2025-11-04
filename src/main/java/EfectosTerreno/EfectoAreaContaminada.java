@@ -1,8 +1,14 @@
 package EfectosTerreno;
 
-public class EfectoAreaContaminada implements EfectoTerreno{
+import UnidadPackage.Unidad;
+
+public class EfectoAreaContaminada extends EfectoBase{
+   public EfectoAreaContaminada() {
+       super(true);
+   }
+
     @Override
-    public String getColorFondo() {
-        return "\u001B[45m"; //Violeta oscuro
+    public void aplicarEfectoFinalTurno(Unidad u) {
+        u.recibirDanio(1);
     }
 }

@@ -1,5 +1,6 @@
 package InterfazUsuario;
 
+import java.io.InputStream;
 import java.util.List;
 
 public interface InterfazUsuario {
@@ -8,4 +9,6 @@ public interface InterfazUsuario {
     String pedirMovimiento();
     int pedirNumeroOpciones(String titulo, List<String> opciones);
     void mostrarMensaje(String mensaje);
+
+    InputStream pedirRutaArchivo();
 }
