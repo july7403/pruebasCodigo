@@ -121,6 +121,10 @@ public abstract class Unidad {
         return estadisticas.getDef();
     }
 
+    public boolean esLaMisma(Unidad unidad) {
+        return false;
+    }
+
     //pendiente pensar en a logica de los baculos
 
 

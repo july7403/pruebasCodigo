@@ -1,0 +1,1869 @@
+--- INICIO: \src\main\java\Builders\EjercitoFactoryTexto.java ---
+package Builders;
+
+import EquipamientoPackage.Baculo;
+import EquipamientoPackage.Equipamiento;
+import Jugador.Jugador;
+import EquipamientoPackage.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
+import UnidadPackage.*;
+
+/* Ejemplo de archivo leido:
+    1   TipoUnidad,Jugador,ATK,DEF,MGC,MOV,HP,ArmaInicial,TipoEstrategiaArma
+    2   LORD,J1,35,30,10,15,1,ESPADA,D_FISICO
+    3   LORD,J2,30,25,15,20,2,GRIMORIO,D_MAGICO
+ */
+
+public class EjercitoFactoryTexto implements IEjercitoFactory{
+    private static Integer idUnidades = 1;
+    /**
+     * Toma una ruta pasada por parametro y devuelve una lista de jugadores con sus ejercitos inicializados
+     * @param dataEjercito una ruta al archivo csv con la configuracion inicial del ejecito
+     */
+    @Override
+    public List<Jugador> procesarEjecito(InputStream dataEjercito) {
+        Map<String,List<Unidad>> unidadesPorJugador = new HashMap<>();
+        try(BufferedReader lector = new BufferedReader(new InputStreamReader(dataEjercito))){
+            String linea;
+            // Linea cabecera no cuenta
+            lector.readLine();
+            while((linea=lector.readLine())!=null){
+                String[] datos = linea.split(",");
+                String codigoJugador = datos[1].trim();
+                Unidad unidad = crearUnidad(datos);
+                unidadesPorJugador
+                        .computeIfAbsent(codigoJugador, k->new ArrayList<>()) //crea una nueva entrada si no esta presente ya el jugador
+                        .add(unidad);
+            }
+
+        }catch (IOException e){
+            throw new RuntimeException("Error al leer el input para procesar Ejercito");
+        }
+        return ensamblarJugadores(unidadesPorJugador);
+    }
+
+    private List<Jugador> ensamblarJugadores(Map<String, List<Unidad>> unidadesPorJugador) {
+        List<Jugador> jugadores = new ArrayList<>();
+
+        String[] coloresDisponibles = {"Rojo", "Azul", "Verde", "Amarillo", "Negro", "Blanco"};
+        int indiceColor = 0;
+
+        for (Map.Entry<String, List<Unidad>> entry : unidadesPorJugador.entrySet()) {
+            String nombreJugador = entry.getKey().trim();
+            List<Unidad> unidadesJugador = entry.getValue();
+
+            String colorAsignado = coloresDisponibles[indiceColor % coloresDisponibles.length];
+            indiceColor++;
+
+            Jugador jugador = new Jugador(nombreJugador, unidadesJugador, colorAsignado);
+            jugadores.add(jugador);
+        }
+
+        // Validación mínima
+        if (jugadores.size() < 2) {
+            throw new IllegalArgumentException("Debe haber al menos dos jugadores definidos en el archivo de ejército.");
+        }
+
+        return jugadores;
+    }
+
+    private Unidad crearUnidad(String[] datos) {
+        //[0] = Tipo de unidad - [2] = ATK - [3] = DEF - [4] = MGC - [5] = MOV - [6] = HP
+        //[7] = Equipamiento - [8] = estrategiaEquipamiento
+
+        Integer atque = Integer.parseInt(datos[2]);
+        Integer defensa = Integer.parseInt(datos[3]);
+        Integer magia = Integer.parseInt(datos[4]);
+        Integer movimiento = Integer.parseInt(datos[5]);
+        Integer vida = Integer.parseInt(datos[6]);
+
+        Estadistica estadisticasUnidad =
+                new Estadistica(atque,defensa,magia,movimiento);
+        Equipamiento arma = crearEquipamiento(datos[7],datos[8]);
+        Integer id = idUnidades++;
+        return nuevaUnidad(datos[0],id,vida,estadisticasUnidad,arma);
+    }
+
+    private Equipamiento crearEquipamiento(String nombreArma, String tipoEstrategia) {
+        nombreArma = nombreArma.trim().toUpperCase();
+        tipoEstrategia = tipoEstrategia.trim().toUpperCase();
+
+        switch (nombreArma) {
+            case "ESPADA":
+            case "LANZA":
+            case "HACHA":
+                return new ArmaCuerpoACuerpo(nombreArma, 10, 20); // atk base 10, 20 usos
+
+            case "BACULO":
+                return new Baculo("Báculo de Curación", 3, 15, new EstrategiaCuracionHP());
+
+            case "GRIMORIO":
+                if (tipoEstrategia.equals("D_MAGICO")) {
+                    return new Grimorio("Grimorio de Fuego", 3, 12, 15);
+                } else {
+                    return new Grimorio("Grimorio Básico", 3, 10, 15);
+                }
+            default:
+                throw new IllegalArgumentException("Tipo de equipamiento no reconocido: " + nombreArma);
+        }
+    }
+
+    private Unidad nuevaUnidad(String tipoUnidad, Integer id,Integer vida, Estadistica estadisticasUnidad, Equipamiento arma) {
+        switch (tipoUnidad.trim().toUpperCase()){
+            case "LORD":
+                return new Lord(id,vida,estadisticasUnidad,arma);
+            case "UNIDAD_BASICA":
+                return new UnidadBasica(id,vida,estadisticasUnidad,arma);
+            default:
+                throw new IllegalArgumentException("Tipo de unidad no registrado");
+        }
+    }
+}
+
+
+--- FIN: \src\main\java\Builders\EjercitoFactoryTexto.java ---
+
+
+--- INICIO: \src\main\java\Builders\IEjercitoFactory.java ---
+package Builders;
+
+import Jugador.Jugador;
+import java.io.InputStream;
+import java.util.List;
+
+public interface IEjercitoFactory {
+    public List<Jugador> procesarEjecito(InputStream dataEjercito);
+}
+
+--- FIN: \src\main\java\Builders\IEjercitoFactory.java ---
+
+
+--- INICIO: \src\main\java\Builders\MapaFactory.java ---
+package Builders;
+
+import Mapa.Mapa;
+
+import java.io.InputStream;
+
+public interface MapaFactory {
+    public Mapa procesarMapa(InputStream data);
+}
+
+--- FIN: \src\main\java\Builders\MapaFactory.java ---
+
+
+--- INICIO: \src\main\java\Builders\MapaFactoryTexto.java ---
+package Builders;
+
+import EfectosTerreno.*;
+import Mapa.Mapa;
+import Mapa.Celda;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
+public class MapaFactoryTexto implements MapaFactory{
+
+    /**
+     * Dado un path procesa el archivo de texto y devuelve un mapa
+     * @param data, un path
+     * @return Mapa mapa construido
+     */
+    @Override
+    public Mapa procesarMapa(InputStream data) {
+        try (BufferedReader lector = new BufferedReader(new InputStreamReader(data))){
+            List<Celda[]> filas = new ArrayList<>();
+            String linea;
+            int fila = 0;
+
+            while ((linea = lector.readLine()) != null){
+                Celda[] celdas = crearDesdeLinea(linea,fila);
+                filas.add(celdas);
+                fila++;
+            }
+            Celda[][] matrizFinal = crearMatriz(filas);
+            return new Mapa(matrizFinal);
+        }catch (IOException e){
+            throw new RuntimeException("Error al leer el input para procesar el mapa");
+        }
+    }
+
+    /**
+     * @param filas Strings que representan a las celdas a contruir
+     * @return Crea la Matriz de celdas corresponiente
+     */
+    private Celda[][] crearMatriz(List<Celda[]> filas) {
+        if (filas.isEmpty()){
+            return new Celda[0][0];
+        }
+        int numeroFilas = filas.size();
+        int numeroColumnas = filas.get(0).length;
+        Celda[][] matriz = new Celda[numeroFilas][numeroColumnas];
+
+        for (int i = 0 ; i < numeroFilas; i++){
+            System.arraycopy(filas.get(i), 0, matriz[i], 0, numeroColumnas);
+        }
+        return matriz;
+    }
+
+    /**
+     * Dada una linea de texto, crea una vector con las celdas correctas
+     * @param linea string que representa a las celdas a construir
+     * @param fila coordena Y
+     * @return vector de celdas contruidas
+     */
+    private Celda[] crearDesdeLinea(String linea, Integer fila){
+        String[] codigos = linea.split(",");
+        Celda[] celdas = new Celda[codigos.length];
+        for (int i = 0; i < codigos.length;i++){
+            String codigo = codigos[i].trim();
+            // switch cases
+            celdas[i] = crearCeldaPorCodigo(codigo, fila,i);
+        }
+        return celdas;
+    }
+
+    /**
+     * Dado un codigo de 3 letras devuelva la celda correspondiente creada
+     * @param codigo string de 3 letras
+     * @param fila entero que representa la posicion en Y
+     * @param i entero que representa la posicion en X
+     * @return Celda contruida
+     */
+    private Celda crearCeldaPorCodigo(String codigo, int fila, int i) {
+        String nombre;
+        boolean esTransitable;
+        EfectoTerreno efectoTerreno;
+        switch (codigo){
+            case "CLL" : //Llanura
+                nombre = "Llanura";
+                esTransitable = true;
+                efectoTerreno = new EfectoLlanura();
+                break;
+            case "BSQ": //Bosque
+                nombre = "Bosque";
+                esTransitable = true;
+                efectoTerreno = new EfectoBosque();
+                break;
+            case "ACL": //Acantilado
+                nombre = "Acantilado";
+                esTransitable = false;
+                efectoTerreno = new EfectoAcantilado();
+                break;
+            case "AGU": //Mar,Lago,Rio,etc.
+                nombre = "Agua";
+                esTransitable = false;
+                efectoTerreno = new EfectoAgua();
+                break;
+            case "PTN": //Pantano
+                nombre = "pantano";
+                esTransitable = true;
+                efectoTerreno = new EfectoPantano();
+                break;
+            case "CST": //Castillo, fortaleza
+                nombre = "Castillo";
+                esTransitable = true;
+                efectoTerreno = new EfectoCastillo();
+                break;
+            case "ACM": //Area Contamiada
+                nombre = "Area Contaminada";
+                esTransitable = true;
+                efectoTerreno = new EfectoAreaContaminada();
+                break;
+            default:
+                throw new IllegalArgumentException("Codigo de terreno no reconocido");
+
+        }
+        return new Celda(nombre,esTransitable,efectoTerreno,fila,i);
+    }
+
+}
+
+/*  CLL --> llanura
+    BSQ --> Bosque
+    AGU --> Agua
+    PTN --> pantano
+    CST --> castillo
+    ACM --> area contaminada
+    ACL --> acantilado
+ */
+
+/* mapa ejemplo
+CST, BSQ, AGU, AGU, AGU, CLL
+BSQ, CLL, CLL, PTN, PTN, BSQ
+ACL, CLL, CLL, CLL, CLL, CLL*/
+
+--- FIN: \src\main\java\Builders\MapaFactoryTexto.java ---
+
+
+--- INICIO: \src\main\java\Builders\ProcesadorMapa.java ---
+package Builders;
+
+import Mapa.Mapa;
+
+import java.io.InputStream;
+
+public class ProcesadorMapa {
+    private MapaFactory procesadorMapa;
+
+    public ProcesadorMapa(MapaFactory procesadorMapa){
+        this.procesadorMapa = procesadorMapa;
+    }
+    public void setProcesadorMapa(MapaFactory procesadorMapa){
+        this.procesadorMapa = procesadorMapa;
+    }
+
+    /**
+     * @param data, input por donde se quiere recibir el mapa a utilizar, un archivo csv
+     * @return Mapa construido
+     */
+    public Mapa procesarMapa(InputStream data){
+        Mapa mapa = this.procesadorMapa.procesarMapa(data);
+        return mapa;
+    }
+}
+
+--- FIN: \src\main\java\Builders\ProcesadorMapa.java ---
+
+
+--- INICIO: \src\main\java\Controladores\ControladorTurnos.java ---
+package Controladores;
+
+import Jugador.Jugador;
+
+public interface ControladorTurnos {
+    void avanzarTurno();
+    Jugador obtenerjugadorActual();
+    Integer obtenerTurnoActual();
+}
+
+--- FIN: \src\main\java\Controladores\ControladorTurnos.java ---
+
+
+--- INICIO: \src\main\java\Controladores\ControladorTurnosTradicional.java ---
+package Controladores;
+
+import Jugador.Jugador;
+
+import java.util.List;
+import java.util.Random;
+
+public class ControladorTurnosTradicional implements ControladorTurnos {
+    private List<Jugador> jugadores;
+    private Integer indiceJugadorActual;
+    private Integer numeroTurnos;
+    private final Integer indiceJugadorInicial;
+
+    public ControladorTurnosTradicional(List<Jugador> jugadores){
+        if (!this.validarJugadores(jugadores)){
+            throw new IllegalArgumentException("la lista de jugadores no puede estar vacia o tener menos de un jugador");
+        }
+        this.jugadores = jugadores;
+        this.indiceJugadorActual = this.getJugadorInicial(jugadores);
+        this.indiceJugadorInicial = this.indiceJugadorActual;
+        this.numeroTurnos = 1;
+    }
+
+    private Integer getJugadorInicial(List<Jugador> jugadores) {
+        Random random = new Random();
+        return random.nextInt(jugadores.size());
+    }
+
+    private boolean validarJugadores(List<Jugador> jugadores){
+        return (jugadores != null && jugadores.size() > 1);
+    }
+
+    @Override
+    public void avanzarTurno() {
+        this.indiceJugadorActual = (this.indiceJugadorActual+1) % this.jugadores.size();
+        if (this.indiceJugadorActual.equals(this.indiceJugadorInicial)){
+            this.numeroTurnos++;
+        }
+
+    }
+
+    @Override
+    public Jugador obtenerjugadorActual() {
+        return this.jugadores.get(this.indiceJugadorActual);
+    }
+
+    @Override
+    public Integer obtenerTurnoActual() {
+        return this.numeroTurnos;
+    }
+}
+
+--- FIN: \src\main\java\Controladores\ControladorTurnosTradicional.java ---
+
+
+--- INICIO: \src\main\java\Controladores\GestorCombate.java ---
+package Controladores;
+
+import EquipamientoPackage.Equipamiento;
+import UnidadPackage.Unidad;
+import Mapa.Mapa;
+import java.util.ArrayList;
+import java.util.List;
+
+//pendiente
+public class GestorCombate {
+
+    private final List<Unidad> unidadesQueActuaronEsteTurno;
+
+    public GestorCombate() {
+
+        this.unidadesQueActuaronEsteTurno = new ArrayList<>();
+    }
+
+    public boolean intentarAtaque(Unidad atacante, Unidad enemigo) {
+
+        if (!validarUnidadNoActuo(atacante) ) {
+            throw new IllegalStateException("Esta Unidad Ya Atacó ");
+        }
+
+        registrarAccion(atacante);
+        atacante.atacar(enemigo);
+        return true;
+    }
+
+
+
+    private boolean validarUnidadNoActuo(Unidad unidad) {
+        for (Unidad u : unidadesQueActuaronEsteTurno) {
+            if (u.esLaMisma(unidad)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int calcularDistancia(Unidad unidad1, Unidad unidad2) {
+        int deltaX = Math.abs(unidad1.getPosicionX() - unidad2.getPosicionX());
+        int deltaY = Math.abs(unidad1.getPosicionY() - unidad2.getPosicionY());
+
+        return Math.max(deltaX, deltaY);
+    }
+
+    private void registrarAccion(Unidad unidad) {
+        unidadesQueActuaronEsteTurno.add(unidad);
+    }
+
+}
+
+--- FIN: \src\main\java\Controladores\GestorCombate.java ---
+
+
+--- INICIO: \src\main\java\Controladores\GestorMovimientos.java ---
+package Controladores;
+
+import Mapa.Mapa;
+import Mapa.Celda;
+import UnidadPackage.Unidad;
+import java.util.Set;
+
+public interface GestorMovimientos {
+    /**
+     * Valida si la unidad puede moverse a la casilla indicada en (X,Y)
+     *
+     * @param unidad
+     * @param mapa
+     * @param destinoX
+     * @param destinoY
+     * @return booleano indicando si puede moverse a esa ubicacion o no
+     */
+    boolean validarMovimiento(Unidad unidad, Mapa mapa, Integer destinoX, Integer destinoY);
+
+    /**
+     * Devuelve las celdas a las que la unidad puede moverse
+     *
+     * @param unidad
+     * @param mapa
+     * @return
+     */
+    Set<Celda> obtenerMovimientosPosibles(Unidad unidad, Mapa mapa);
+
+    /**
+     * Mueve a la unidad a la celda indicada por el usuario
+     * @param unidad
+     * @param mapa
+     * @param destinoX
+     * @param destinoY
+     */
+    void moverUnidad(Unidad unidad, Mapa mapa, Integer destinoX, Integer destinoY);
+}
+
+--- FIN: \src\main\java\Controladores\GestorMovimientos.java ---
+
+
+--- INICIO: \src\main\java\Controladores\GestorMovimientosBasico.java ---
+package Controladores;
+
+import Mapa.Mapa;
+import Mapa.Celda;
+import UnidadPackage.Unidad;
+
+import java.util.Set;
+
+public class GestorMovimientosBasico implements GestorMovimientos {
+
+    @Override
+    public boolean validarMovimiento(Unidad unidad, Mapa mapa, Integer destinoX, Integer destinoY) {
+        return false;
+    }
+
+    @Override
+    public void moverUnidad(Unidad unidad, Mapa mapa, Integer destinoX, Integer destinoY) {
+
+    }
+
+    @Override
+    public Set<Celda> obtenerMovimientosPosibles(Unidad unidad, Mapa mapa) {
+        return Set.of();
+    }
+}
+
+--- FIN: \src\main\java\Controladores\GestorMovimientosBasico.java ---
+
+
+--- INICIO: \src\main\java\EfectosTerreno\EfectoAcantilado.java ---
+package EfectosTerreno;
+
+public class EfectoAcantilado extends EfectoBase {
+    public EfectoAcantilado() {
+        super(false);
+    }
+
+
+
+}
+
+--- FIN: \src\main\java\EfectosTerreno\EfectoAcantilado.java ---
+
+
+--- INICIO: \src\main\java\EfectosTerreno\EfectoAgua.java ---
+package EfectosTerreno;
+
+public class EfectoAgua extends EfectoBase {
+    public EfectoAgua() {
+        super(false);
+    }
+}
+
+--- FIN: \src\main\java\EfectosTerreno\EfectoAgua.java ---
+
+
+--- INICIO: \src\main\java\EfectosTerreno\EfectoAreaContaminada.java ---
+package EfectosTerreno;
+
+import UnidadPackage.Unidad;
+
+public class EfectoAreaContaminada extends EfectoBase{
+   public EfectoAreaContaminada() {
+       super(true);
+   }
+
+    @Override
+    public void aplicarEfectoFinalTurno(Unidad u) {
+        u.recibirDanio(1);
+    }
+}
+
+--- FIN: \src\main\java\EfectosTerreno\EfectoAreaContaminada.java ---
+
+
+--- INICIO: \src\main\java\EfectosTerreno\EfectoBase.java ---
+package EfectosTerreno;
+import UnidadPackage.Unidad;
+public abstract class EfectoBase implements EfectoTerreno{
+    protected final boolean transitable;
+    protected EfectoBase(boolean transitable) { this.transitable = transitable; }
+
+    @Override public boolean esTransitablePor(Unidad u) { return transitable; }
+    @Override public int movimientoEfectivo(Unidad u, int movBase) { return movBase; }
+    @Override public int modificarAtk(Unidad u) { return 0; }
+    @Override public int modificarDef(Unidad u) { return 0; }
+    @Override public int modificarMgc(Unidad u) { return 0; }
+    @Override public void aplicarEfectoFinalTurno(Unidad u) {
+    }
+    @Override public int bonusDefensaTurnoRival(Unidad u, boolean esTurnoDelRival) {
+            return 0;
+        }
+
+
+
+
+}
+
+--- FIN: \src\main\java\EfectosTerreno\EfectoBase.java ---
+
+
+--- INICIO: \src\main\java\EfectosTerreno\EfectoBosque.java ---
+package EfectosTerreno;
+
+import UnidadPackage.Unidad;
+
+public class EfectoBosque extends EfectoBase{
+    public EfectoBosque() {
+        super(true);
+    }
+
+    @Override
+    public int modificarAtk(Unidad u) {
+        return 1;
+    }
+    public int modificarDef(Unidad u) {
+        return 1;
+    }
+
+
+}
+
+--- FIN: \src\main\java\EfectosTerreno\EfectoBosque.java ---
+
+
+--- INICIO: \src\main\java\EfectosTerreno\EfectoCastillo.java ---
+package EfectosTerreno;
+
+import UnidadPackage.Unidad;
+
+public class EfectoCastillo extends EfectoBase{
+    public EfectoCastillo() {
+        super(true);
+    }
+
+    @Override
+    public int modificarDef(Unidad u) {
+        return 1;
+    }
+
+    @Override
+    public void aplicarEfectoFinalTurno(Unidad u) {
+        super.aplicarEfectoFinalTurno(u);
+    }
+    @Override
+    public int bonusDefensaTurnoRival(Unidad u, boolean esTurnoDelRival) {
+        return esTurnoDelRival ? 2 : 0;
+    }
+}
+
+--- FIN: \src\main\java\EfectosTerreno\EfectoCastillo.java ---
+
+
+--- INICIO: \src\main\java\EfectosTerreno\EfectoLlanura.java ---
+package EfectosTerreno;
+
+public final class EfectoLlanura extends EfectoBase {
+    public EfectoLlanura() {
+        super(true);
+    }
+}
+
+--- FIN: \src\main\java\EfectosTerreno\EfectoLlanura.java ---
+
+
+--- INICIO: \src\main\java\EfectosTerreno\EfectoPantano.java ---
+package EfectosTerreno;
+
+import UnidadPackage.Unidad;
+
+public final class EfectoPantano extends EfectoBase {
+
+    public EfectoPantano() {
+        super(true);
+    }
+
+    @Override
+    public int movimientoEfectivo(Unidad u, int movBase) {
+        return 1;
+    }
+
+
+
+}
+
+--- FIN: \src\main\java\EfectosTerreno\EfectoPantano.java ---
+
+
+--- INICIO: \src\main\java\EfectosTerreno\EfectoTerreno.java ---
+package EfectosTerreno;
+
+import UnidadPackage.Unidad;
+
+public interface EfectoTerreno {
+    //public void aplicar(Unidad unidad) {}
+    //public void remover(Unidad unidad) {}
+
+
+    boolean esTransitablePor(Unidad u);
+    int movimientoEfectivo(Unidad u, int movimiento);
+    int modificarAtk(Unidad u);
+    int modificarDef(Unidad u);
+    int modificarMgc(Unidad u);
+    public void aplicarEfectoFinalTurno(Unidad unidad);
+    int bonusDefensaTurnoRival(Unidad u, boolean esTurnoDelRival);
+}
+
+--- FIN: \src\main\java\EfectosTerreno\EfectoTerreno.java ---
+
+
+--- INICIO: \src\main\java\EquipamientoPackage\ArmaCuerpoACuerpo.java ---
+package EquipamientoPackage;
+
+public class ArmaCuerpoACuerpo extends Equipamiento {
+
+    public ArmaCuerpoACuerpo(String nombre, Integer atk, Integer usosMaximos) {
+        super(
+                nombre,
+                1, // siempre 1 para armas cuerpo a cuerpo
+                atk,
+                0, // No tiene boost mágico
+                usosMaximos,
+                new EstrategiaCuerpoACuerpo());
+    }}
+
+--- FIN: \src\main\java\EquipamientoPackage\ArmaCuerpoACuerpo.java ---
+
+
+--- INICIO: \src\main\java\EquipamientoPackage\Baculo.java ---
+package EquipamientoPackage;
+
+public class Baculo extends Equipamiento {
+
+    public Baculo(String nombre, Integer rango, Integer usosMaximos, IEstrategiaEquipamiento estrategia) {
+        super(
+                nombre,
+                rango,
+                0, // No tiene ATK
+                0, // No tiene MGC
+                usosMaximos,
+                new EstrategiaCuracionHP()
+
+        );
+    }
+
+
+}
+
+--- FIN: \src\main\java\EquipamientoPackage\Baculo.java ---
+
+
+--- INICIO: \src\main\java\EquipamientoPackage\Equipamiento.java ---
+package EquipamientoPackage;
+
+import UnidadPackage.Unidad;
+
+
+public abstract class Equipamiento {
+    protected String nombre;
+    protected Integer rango;
+    protected Integer atk; // ataque físico que se le suma a unidad
+    protected Integer mgc; // magia que se le suma a unidad
+    protected Integer usosMaximos;
+    protected Integer usosRestantes;
+    protected IEstrategiaEquipamiento estrategia;
+
+    public Equipamiento(String nombre, Integer rango, Integer atk, Integer mgc, Integer usosMaximos, IEstrategiaEquipamiento estrategia) {
+        this.nombre = nombre;
+        this.rango = rango;
+        this.atk = atk;
+        this.mgc = mgc;
+        this.usosMaximos = usosMaximos;
+        this.usosRestantes = usosMaximos;
+        this.estrategia = estrategia;
+    }
+
+    public boolean estaRoto() {
+        return usosRestantes <= 0;
+    }
+
+    //atacar o sanar
+    public void usar(Unidad atacante, Unidad objetivo) {
+        if (estaRoto()) {
+            throw new IllegalStateException("El equipamiento está roto");
+        }
+        estrategia.ejecutar(atacante, objetivo);
+        usosRestantes--;
+    }
+
+    public Integer getAtk() {
+        return atk;
+    }
+
+    public Integer getMgc() {
+        return mgc;
+    }
+
+}
+
+--- FIN: \src\main\java\EquipamientoPackage\Equipamiento.java ---
+
+
+--- INICIO: \src\main\java\EquipamientoPackage\EstrategiaCuerpoACuerpo.java ---
+package EquipamientoPackage;
+
+import UnidadPackage.Unidad;
+
+public class EstrategiaCuerpoACuerpo implements IEstrategiaEquipamiento {
+   //le paso la responsabilidad a Cada estrategia
+
+    @Override
+    public void ejecutar(Unidad atacante, Unidad objetivo) {
+            int atkTotal = atacante.obtenerAtkTotal();
+            int defTotal = objetivo.obtenerDefensaTotal();
+            int danio = atkTotal - defTotal;
+
+            if (danio > 0) {
+                objetivo.recibirDanio(danio);
+            }
+
+    }
+}
+
+--- FIN: \src\main\java\EquipamientoPackage\EstrategiaCuerpoACuerpo.java ---
+
+
+--- INICIO: \src\main\java\EquipamientoPackage\EstrategiaCuracionHP.java ---
+package EquipamientoPackage;
+
+import UnidadPackage.Unidad;
+
+public class EstrategiaCuracionHP implements IEstrategiaEquipamiento {
+    @Override
+    public void ejecutar(Unidad atacante, Unidad objetivo) {
+
+    }
+}
+
+--- FIN: \src\main\java\EquipamientoPackage\EstrategiaCuracionHP.java ---
+
+
+--- INICIO: \src\main\java\EquipamientoPackage\EstrategiaMagica.java ---
+package EquipamientoPackage;
+
+import UnidadPackage.Unidad;
+
+public class EstrategiaMagica implements IEstrategiaEquipamiento{
+    @Override
+    public void ejecutar(Unidad atacante, Unidad objetivo) {
+
+        int mgcTotal = atacante.obtenerMgcTotal();
+        int mgcDefensa = objetivo.obtenerDefensaMagicaTotal();
+        int danio = mgcTotal - mgcDefensa;
+
+        if (danio > 0) {
+            objetivo.recibirDanio(danio);
+        }
+    }
+}
+
+--- FIN: \src\main\java\EquipamientoPackage\EstrategiaMagica.java ---
+
+
+--- INICIO: \src\main\java\EquipamientoPackage\Grimorio.java ---
+package EquipamientoPackage;
+
+public class Grimorio extends Equipamiento {
+    public Grimorio(String nombre, Integer rango, Integer mgc, Integer usosMaximos) {
+        super(
+                nombre,
+                rango,
+                0, // No tiene ATK físico
+                mgc,
+                usosMaximos,
+                new EstrategiaMagica()
+        );
+    }
+
+
+}
+
+--- FIN: \src\main\java\EquipamientoPackage\Grimorio.java ---
+
+
+--- INICIO: \src\main\java\EquipamientoPackage\IEstrategiaEquipamiento.java ---
+package EquipamientoPackage;
+
+import UnidadPackage.Unidad;
+
+public interface IEstrategiaEquipamiento {
+
+    void ejecutar(Unidad atacante, Unidad objetivo);
+}
+
+--- FIN: \src\main\java\EquipamientoPackage\IEstrategiaEquipamiento.java ---
+
+
+--- INICIO: \src\main\java\EquipamientoPackage\Pu�oLimpio.java ---
+package EquipamientoPackage;
+
+public class PuñoLimpio extends Equipamiento{
+    private static PuñoLimpio instancia;
+    private PuñoLimpio() {
+        super("Puño Limpio",
+                1,
+                0,
+                0,
+                10000, //infinito
+                new EstrategiaCuerpoACuerpo());
+    }
+    public static PuñoLimpio obtenerInstancia(){
+        if (instancia==null){
+            instancia = new PuñoLimpio();
+        }
+        return instancia;
+    }
+
+}
+
+--- FIN: \src\main\java\EquipamientoPackage\Pu�oLimpio.java ---
+
+
+--- INICIO: \src\main\java\InterfazUsuario\InterfazConsola.java ---
+package InterfazUsuario;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
+import org.jline.terminal.*;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
+
+public class InterfazConsola implements InterfazUsuario{
+
+    private final LineReader lectorEntrada;
+    private final String prompt =">>> "; //despues lo saco
+
+    public InterfazConsola () throws IOException {
+        Terminal terminal = TerminalBuilder.builder().system(true).build();
+        lectorEntrada = LineReaderBuilder.builder()
+                .terminal(terminal)
+                .build();
+    }
+
+
+    @Override
+    public String pedirNombreUsuario() {
+        this.mostrarMensaje("Ingrese nombre usuario:");
+        this.mostrarMensaje(prompt);
+        while(true){
+            String input = lectorEntrada.readLine();
+            if (input.isEmpty()){
+                this.mostrarMensaje("Opcion Invalida. Intente nuevamente.");
+            }else {
+                return input;
+            }
+        }
+    }
+
+    @Override
+    public String pedirAccion() {
+        mostrarMensaje("\nAcciones disponibles: (mover, atacar, pasar)");
+        while (true) {
+            try {
+                String input = lectorEntrada.readLine("Ingrese acción: ").trim().toLowerCase();
+
+                if (input.equals("mover") || input.equals("atacar") || input.equals("pasar")) {
+                    return input;
+                }
+                mostrarMensaje("Acción invalida. Intenta de nuevo.");
+            } catch (UserInterruptException e) {
+                mostrarMensaje("\nOperación cancelada por el usuario.");
+                return null;
+            } catch (Exception e) {
+                mostrarMensaje("Error: " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public String pedirMovimiento() {
+        mostrarMensaje("\nIngresa coordenadas del movimiento o colocación (x,y):");
+        while (true) {
+            try {
+                String input = lectorEntrada.readLine(">>> ").trim();
+
+                if (input.equalsIgnoreCase("salir")) {
+                    mostrarMensaje("Operación cancelada por el usuario.");
+                    return null;
+                }
+
+                if (input.matches("\\d+\\s*,\\s*\\d+")) {
+                    return input;
+                }
+
+                mostrarMensaje("Formato invalido. Use el formato x,y.");
+
+            } catch (UserInterruptException e) {
+                mostrarMensaje("\nOperación cancelada por el usuario.");
+                return null;
+            } catch (Exception e) {
+                mostrarMensaje("Error: " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public int pedirNumeroOpciones(String titulo, List<String> opciones) {
+        this.mostrarMensaje(titulo);
+        for ( int i = 0; i<opciones.size();i++){
+            this.mostrarMensaje((i+1)+". "+opciones.get(i));
+        }
+        while(true){
+            String input = lectorEntrada.readLine("Ingrese numero de la opcion deseada: ");
+            try{
+                int opcion = Integer.parseInt(input);
+                if(opcion >= 1 && opcion <= opciones.size()){
+                    return opcion-1;
+                }
+            }catch (NumberFormatException ignorara){}
+            this.mostrarMensaje("Opcion Invalida. Intente nuevamente.");
+        }
+    }
+
+    //Para pequeños mensajes de error o demas
+    @Override
+    public void mostrarMensaje(String mensaje) {
+        System.out.println(mensaje);
+    }
+
+    @Override
+    public InputStream pedirRutaArchivo() {
+        while (true){
+            try {
+                String rutaArchivo = lectorEntrada.readLine(prompt).trim();
+                if (rutaArchivo.isEmpty()) {
+                    System.err.println("ERROR: la ruta no puede ser vacia");
+                    continue;
+                }
+                try {
+                    Path ruta = Paths.get(rutaArchivo);
+                    if (Files.exists(ruta) && Files.isRegularFile(ruta)) {
+                        return new FileInputStream(ruta.toFile());
+                    }
+                } catch (Exception ignored) {
+
+                }
+                InputStream input = getClass().getClassLoader().getResourceAsStream(rutaArchivo);
+                if (input != null) {
+                    System.out.println("Archivo cargado");
+                    return input;
+                }
+                System.err.println("❌ ERROR: Archivo no encontrado en la ruta de disco ni en el classpath.");
+                System.out.println();
+            }catch (org.jline.reader.UserInterruptException e){
+                System.out.println("\nOperación cancelada.");
+                return null;
+            }catch (org.jline.reader.EndOfFileException e) {
+                System.out.println("\nOperación cancelada por Ctrl+D.");
+                return null;
+            }
+            catch (Exception e) {
+                System.err.println("ERROR: error de I/O"+e.getMessage());
+                System.out.println();
+            }
+        }
+    }
+}
+
+--- FIN: \src\main\java\InterfazUsuario\InterfazConsola.java ---
+
+
+--- INICIO: \src\main\java\InterfazUsuario\InterfazUsuario.java ---
+package InterfazUsuario;
+
+import java.io.InputStream;
+import java.util.List;
+
+public interface InterfazUsuario {
+    String pedirNombreUsuario();
+    String pedirAccion();
+    String pedirMovimiento();
+    int pedirNumeroOpciones(String titulo, List<String> opciones);
+    void mostrarMensaje(String mensaje);
+
+    InputStream pedirRutaArchivo();
+}
+
+--- FIN: \src\main\java\InterfazUsuario\InterfazUsuario.java ---
+
+
+--- INICIO: \src\main\java\Juego\Juego.java ---
+package Juego;
+
+import Controladores.ControladorTurnos;
+import Controladores.GestorMovimientos;
+import InterfazUsuario.InterfazUsuario;
+import Jugador.Jugador;
+import Mapa.Mapa;
+import MostrablePackage.Mostrable;
+
+import java.util.List;
+
+public class Juego {
+    private Mapa mapaJuego;
+    private List<Jugador> jugadores;
+    private ControladorTurnos controladorTurnos;
+    private GestorMovimientos gestorMovimientos;
+    private InterfazUsuario manejadorInputs; //maneja los inputs del usuario
+    private Mostrable mostrable; //maneja solamente lo que se va a mostrar
+    private boolean partidaFinalizada; //podria ser un ENUM o algo mas pero planteo inicial
+
+    public Juego(Mapa mapa, List<Jugador> jugadores, ControladorTurnos controladorTurnos,
+                 GestorMovimientos gestorMovimientos, InterfazUsuario interfazUsuario, Mostrable mostrable){
+        this.mapaJuego = mapa;
+        this.jugadores = jugadores;
+        this.controladorTurnos = controladorTurnos;
+        this.gestorMovimientos = gestorMovimientos;
+        this.manejadorInputs = interfazUsuario;
+        this.mostrable = mostrable;
+        this.partidaFinalizada = false;
+        //falta logica de setear lords para el patron Observer
+    }
+}
+
+--- FIN: \src\main\java\Juego\Juego.java ---
+
+
+--- INICIO: \src\main\java\Jugador\Jugador.java ---
+package Jugador;
+import java.util.List;
+import UnidadPackage.Unidad;
+
+public class Jugador {
+    private String nombre;
+    private List<Unidad> unidades;
+    private String color;
+
+    public Jugador (String nombre, List<Unidad> unidades, String color){
+        this.nombre = nombre;
+        this.unidades = unidades;
+        this.color = color;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+    public String getColor(){
+        return this.color;
+    }
+    public List<Unidad> getUnidades() {
+        return unidades;
+    }
+    public boolean tieneEstaUnidad(Unidad unidad){
+        return this.unidades.contains(unidad);
+    }
+
+    public String contarUnidadesVivas() {
+        return String.valueOf(this.unidades.size());
+    }
+
+    public void setNombre(String nuevoNombre) {
+        this.nombre = nuevoNombre;
+    }
+}
+
+--- FIN: \src\main\java\Jugador\Jugador.java ---
+
+
+--- INICIO: \src\main\java\Mapa\Celda.java ---
+package Mapa;
+
+import EfectosTerreno.EfectoTerreno;
+import UnidadPackage.Unidad;
+
+public class Celda {
+    private Integer x;
+    private Integer y;
+    private String nombre;
+    private boolean esTransitable;
+    private boolean unidadOculta;
+    private EfectoTerreno efectoTerreno;
+    private Unidad unidadActaul = null;
+
+    public Celda(String nombre, boolean esTransitable, EfectoTerreno efectoTerreno, int Y, int X) {
+        this.nombre = nombre;
+        this.esTransitable = esTransitable;
+        this.efectoTerreno = efectoTerreno;
+        this.y = Y;
+        this.x = X;
+    }
+
+    public boolean estaVacia() {
+        return this.unidadActaul == null; //fix: deberia ser true si esta vacio
+    }
+    public Unidad getUnidadActaul(){
+        return this.unidadActaul;
+    }
+
+    /**
+     * Si es pocible coloca la unidad en la casilla, caso contrario lanza excepcion
+     * @param unidad Unidad a colocar
+     */
+    public void colocarUnidad(Unidad unidad){
+        if (!this.estaVacia()){
+            throw new IllegalArgumentException("La casilla ya esta ocupada por una unidad");
+        }
+        this.unidadActaul=unidad;
+        //aplicarEfecto(this.unidadActual);
+    }
+    public Unidad removerUnidad(){
+        if(!this.estaVacia()){
+            Unidad unidadRemovida = this.getUnidadActaul();
+            //quitarEfecto(unidadRemovida)
+            this.unidadActaul = null;
+            return unidadRemovida;
+        }
+        return null;
+    }
+    public boolean esTransitable(){return this.esTransitable;}
+    public Integer getX(){return this.x;}
+    public Integer getY(){return this.y;}
+//    public String getColor(){
+//        return this.efectoTerreno.getColorFondo();
+//    }
+    public boolean UnidadOculta(){return this.unidadOculta;}
+
+    public String getColor() {
+        return "color";
+    }
+}
+
+--- FIN: \src\main\java\Mapa\Celda.java ---
+
+
+--- INICIO: \src\main\java\Mapa\Mapa.java ---
+package Mapa;
+
+public class Mapa {
+    private Celda [][] celdas;
+
+    public Mapa (Celda[][] celdas){
+        this.celdas = celdas;
+    }
+
+    /**
+     * Dado un (x,y) devuelve si es una celda validad dentro del mapa actual
+     * @param x Integer
+     * @param y Integer
+     * @return boolean (true o false)
+     */
+    public boolean validarCelda(Integer x, Integer y){
+        boolean filaValida = (0<= y && y<this.celdas.length);
+        boolean columnaValida = (0<=x && x<this.celdas[0].length);
+        return filaValida && columnaValida;
+    }
+
+    /**
+     * Dado un (x,y) devuelve la Celda correspondiente, caso de (x,y) no valido devuelve null
+     * @param x Integer
+     * @param y Integer
+     */
+    public Celda getCelda(Integer x, Integer y){
+        if (validarCelda(x,y)){
+            return this.celdas[y][x];
+        }
+        return null;
+    }
+    // Devuelve el ancho del mapa rectangular
+    public Integer getAncho(){
+        return this.celdas[0].length;
+    }
+    //devuelve el alto del mapa rectangular
+    public Integer getAlto(){
+        return this.celdas.length;
+    }
+}
+
+--- FIN: \src\main\java\Mapa\Mapa.java ---
+
+
+--- INICIO: \src\main\java\Mapa\Terreno.java ---
+package Mapa;
+import UnidadPackage.Unidad;
+import EfectosTerreno.EfectoTerreno;
+
+public class Terreno{
+    private String nombre;
+    private boolean esTransitable;
+    private EfectoTerreno efecto;
+
+    public Terreno(String nombre, boolean esTransitable, EfectoTerreno efecto) {
+        this.nombre = nombre;
+        this.esTransitable = esTransitable;
+        this.efecto = efecto;
+    }
+    public String getNombre() {
+        return nombre;
+    }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+    public boolean isEsTransitable() {
+        return esTransitable;
+    }
+    public void setEsTransitable(boolean esTransitable) {
+        this.esTransitable = esTransitable;
+    }
+    public EfectoTerreno getEfecto() {
+        return efecto;
+    }
+    public void setEfecto(EfectoTerreno efecto) {
+        this.efecto = efecto;
+    }
+//    public boolean esTransitable(Unidad u) {
+//        return efecto.esTransitablepor(u);
+//
+//    }
+    public int movimientoEfectivo(Unidad u, int movimiento) {
+        return efecto.movimientoEfectivo(u, movimiento);
+    }
+    public int modificarAtk(Unidad u) {
+        return efecto.modificarAtk(u);
+    }
+    public int modificarDef(Unidad u) {
+        return efecto.modificarDef(u);
+    }
+    public int modificarMgc(Unidad u) {
+        return efecto.modificarMgc(u);
+    }
+    public void aplicarEfectoFinalTurno(Unidad u) {
+         efecto.aplicarEfectoFinalTurno(u);
+    }
+}
+
+--- FIN: \src\main\java\Mapa\Terreno.java ---
+
+
+--- INICIO: \src\main\java\MostrablePackage\Mostrable.java ---
+package MostrablePackage;
+
+import Jugador.Jugador;
+import Mapa.Mapa;
+import UnidadPackage.Unidad;
+
+import java.util.List;
+
+public interface Mostrable {
+    //Depende de quien sea el turno actual, como se va a mostrar el mapa
+    void mostrarMapa(Mapa mapa, Jugador jugadorActual);
+    //mostraria la informacion necesaria del jugador actual (unidades, turnos y demas)
+    void mostrarJugador(Jugador jugadorActual);
+    //recibe una unidad y muestra sus estaditicas estado y demas
+    void mostrarUnidad(Unidad unidad);
+    void mostrarMensaje(String mensaje);
+    void mostrarGanador(Jugador ganador);
+    void mostrarOpciones(List<String> opciones);
+}
+
+--- FIN: \src\main\java\MostrablePackage\Mostrable.java ---
+
+
+--- INICIO: \src\main\java\MostrablePackage\MostrableConsola.java ---
+package MostrablePackage;
+
+import Jugador.Jugador;
+import Mapa.Mapa;
+import UnidadPackage.Unidad;
+import Jugador.Jugador;
+import Mapa.Celda;
+import java.util.List;
+
+public class MostrableConsola implements Mostrable {
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String COLOR_OPONENTE_NEUTRO = "\u001B[37m";
+    private static final String COLOR_ENREDADERA = "\u001B[42m";
+    public void mostrarMapa(Mapa mapa, Jugador jugadorActual){
+        int alto = mapa.getAlto();
+        int ancho = mapa.getAncho();
+        for (int y = 0; y < alto; y++){
+            System.out.print("|");
+            for (int x = 0; x<ancho;x++){
+                Celda celda = mapa.getCelda(x,y);
+                String salida = decidirSalida(celda,jugadorActual);
+                System.out.print(salida);
+            }
+            System.out.println();
+        }
+    }
+
+    private String decidirSalida(Celda celda, Jugador jugadorActual) {
+        String caracter = " ";
+        String relleno = " ";
+        if (!celda.estaVacia()){
+            Unidad unidad = celda.getUnidadActaul();
+            if (!jugadorActual.tieneEstaUnidad(unidad) && celda.UnidadOculta() ){
+
+                String colorFondo = COLOR_ENREDADERA;
+                String colorFrente = COLOR_OPONENTE_NEUTRO;
+                caracter = "X";
+                return colorFondo+colorFrente+relleno+caracter+relleno+ANSI_RESET;
+            }
+            // si la unidad no esta oculta del enemigo o propia
+            String colorFondo = celda.getColor();
+             caracter = unidad.getDisplay();
+            if (jugadorActual.tieneEstaUnidad(unidad)){
+                return colorFondo + jugadorActual.getColor()+relleno+  caracter+relleno + ANSI_RESET;
+            }else{
+                return colorFondo + COLOR_OPONENTE_NEUTRO +relleno+ caracter +relleno+ ANSI_RESET;
+            }
+        }else {
+            String colorFondo = celda.getColor();
+            String colorFrente = "\u001B[30m";
+            return colorFondo + colorFrente +relleno+" "+relleno  + ANSI_RESET;
+        }
+    }
+
+    @Override
+    public void mostrarUnidad(Unidad unidad) {
+        //TODO: ampliar con mas informacion, quizas se pued dividir en dos metodos
+        // version resumida o version completa (uno muestra informacion importante y el otro
+        // informacion completa de la unidad)
+        System.out.println("-- Unidad: "+getNombreUnidad(unidad)+ "Id: "+unidad.getId());
+        System.out.println("-- HP: "+unidad.getVida());
+        System.out.println("------------------------------------------");
+    }
+
+    private String getNombreUnidad(Unidad unidad) {
+        String display = unidad.getDisplay();
+        return switch (display) {
+            case "L" -> "Lord";
+            case "U" -> "Unidad Basica";
+            default -> throw new IllegalArgumentException("Unidad no reconocida");
+        };
+    }
+
+    @Override
+    public void mostrarMensaje(String mensaje) {
+        System.out.println(mensaje);
+    }
+
+    @Override
+    public void mostrarOpciones(List<String> opciones) {
+        //lista las opciones disponibles (como Atacar,Dormir,Mover o las direcciones en las que se puede mover)
+        System.out.println("\n--- Opciones Disponibles ---");
+        for (int i = 0; i<opciones.size();i++){
+            System.out.println(" ["+(i+1)+"] "+ opciones.get(i));
+        }
+        System.out.println(">>> Ingrese el número de la opción:");
+    }
+
+    @Override
+    public void mostrarGanador(Jugador ganador) {
+        System.out.println("\n*********************************************");
+        System.out.println(" ¡FELICIDADES! EL GANADOR ES: " + ganador.getNombre());
+        System.out.println("*********************************************");
+    }
+
+    @Override
+    public void mostrarJugador(Jugador jugadorActual) {
+        //esto seria informacion que se muestra antes del turno de un jugador
+        System.out.println("\n=============================================");
+        System.out.println(" TURNO DEL JUGADOR: " + jugadorActual.getNombre());
+        System.out.println("  Unidades vivas: " + jugadorActual.contarUnidadesVivas());
+        System.out.println("=============================================");
+    }
+}
+
+--- FIN: \src\main\java\MostrablePackage\MostrableConsola.java ---
+
+
+--- INICIO: \src\main\java\UnidadPackage\Estadistica.java ---
+package UnidadPackage;
+
+public class Estadistica {
+    private Integer atk;
+    private Integer def;
+    private Integer mgc;
+    private Integer mov;
+
+    public Estadistica(Integer atk, Integer def, Integer mgc, Integer mov){
+        this.atk = atk;
+        this.def = def;
+        this.mgc = mgc;
+        this.mov = mov;
+    }
+
+    public Integer getDef() {
+        return def;
+    }
+
+    public Integer getMgc() {
+        return mgc;
+    }
+
+    public Integer getMov() {
+        return mov;
+    }
+
+    public Integer getAtk() {
+        return atk;
+    }
+}
+
+--- FIN: \src\main\java\UnidadPackage\Estadistica.java ---
+
+
+--- INICIO: \src\main\java\UnidadPackage\Lord.java ---
+package UnidadPackage;
+
+import EquipamientoPackage.Equipamiento;
+
+public class Lord extends Unidad {
+    public Lord(Integer id, Integer vida, Estadistica estadisticas, Equipamiento equipamiento) {
+        super(id, vida, estadisticas, equipamiento);
+    }
+
+    @Override
+    public String getDisplay() {
+        return "L";  //L de lord
+    }
+}
+
+--- FIN: \src\main\java\UnidadPackage\Lord.java ---
+
+
+--- INICIO: \src\main\java\UnidadPackage\Unidad.java ---
+package UnidadPackage;
+
+import EquipamientoPackage.Equipamiento;
+import EquipamientoPackage.PuñoLimpio;
+import Mapa.Mapa;
+
+public abstract class Unidad {
+    private Integer id;
+    private Estadistica estadisticas;
+    private Integer vida;
+    private Equipamiento equipamiento;
+    private Integer posicionX;
+    private Integer posicionY;
+    private boolean oculta;
+    private boolean eliminada;
+
+    public Unidad(Integer id,Integer vida, Estadistica estadisticas, Equipamiento equipamiento){
+        this.id = id;
+        this.vida = vida;
+        this.estadisticas = estadisticas;
+        this.equipamiento = equipamiento;
+        this.oculta = false;
+        this.eliminada = false;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+    public Integer getVida() {
+        return vida;
+    }
+
+    public Equipamiento getEquipamiento() {
+        if (this.equipamiento==null){
+            return PuñoLimpio.obtenerInstancia();
+        }
+        return this.equipamiento;
+    }
+    public Integer getPosicionX() {
+        return posicionX;
+    }
+    public Integer getPosicionY() {
+        return posicionY;
+    }
+    public boolean estaOculta() {
+        return oculta;
+    }
+    public boolean estaEliminada() {
+        return eliminada;
+    }
+
+    //Apartado estadisticas:
+    public int getAtk(){return this.estadisticas.getAtk();}
+    public int getDef(){return this.estadisticas.getDef();}
+    public int getMgc(){return this.estadisticas.getMgc();}
+    public int getMov(){return this.estadisticas.getMov();}
+
+    public void moverA(Integer posicionX,Integer posicionY, Mapa mapa){
+        if (eliminada) throw new IllegalArgumentException("La unidad ya esta eliminada");
+        this.posicionX = posicionX;
+        this.posicionY = posicionY;
+    }
+
+    //pensar en aplicar observer
+    public void recibirDanio(int danio){
+        if (eliminada) return;
+        this.vida -= danio;
+        if (this.vida <= 0){
+            vida = 0;
+            eliminada = true;
+        }
+
+    }
+    public void equipar(Equipamiento equipamiento){
+        this.equipamiento = equipamiento;
+    }
+    public abstract String getDisplay();
+
+
+    //Logica de atacar
+
+    public void atacar(Unidad objetivo) {
+        if (eliminada) {
+            throw new IllegalStateException("Una unidad eliminada no puede atacar");
+        }
+        if (objetivo.estaEliminada()) {
+            throw new IllegalArgumentException("No se puede atacar a una unidad eliminada");
+        }
+        equipamiento.usar(this, objetivo);
+
+    }
+
+    public void usarEquipamientoEn(Unidad aliado) {
+        equipamiento.usar(this, aliado);
+    }
+
+    public int obtenerAtkTotal() {
+        //int terr = mapa.terrenoEn(posicion).modificarAtk(this);
+        //pensar si hay otra forma de hacerlo así no le pedimos a estadisticas que pase los datos
+        int atkBase = estadisticas.getAtk();
+        if (!equipamiento.estaRoto()) {
+            return atkBase + equipamiento.getAtk();
+        }
+        return atkBase;
+    }
+
+    public int obtenerMgcTotal() {
+        //int mgcTerr = mapa.terrenoEn(posicion).modificarAtk(this)
+        int mgcBase = estadisticas.getMgc();
+        if (!equipamiento.estaRoto()) {
+            return mgcBase + equipamiento.getMgc();
+        }
+        return mgcBase;
+    }
+
+    public int obtenerDefensaMagicaTotal() {
+        return estadisticas.getMgc();
+    }
+
+    public int obtenerDefensaTotal() {
+        return estadisticas.getDef();
+    }
+
+    public boolean esLaMisma(Unidad unidad) {
+        return false;
+    }
+
+    //pendiente pensar en a logica de los baculos
+
+
+}
+
+
+--- FIN: \src\main\java\UnidadPackage\Unidad.java ---
+
+
+--- INICIO: \src\main\java\UnidadPackage\UnidadBasica.java ---
+package UnidadPackage;
+
+import EquipamientoPackage.Equipamiento;
+
+public class UnidadBasica extends Unidad {
+    public UnidadBasica(Integer id, Integer vida, Estadistica estadisticas, Equipamiento equipamiento) {
+        super(id, vida, estadisticas, equipamiento);
+    }
+
+    @Override
+    public String getDisplay() {
+        return "U"; //U de unidad basica
+    }
+}
+
+--- FIN: \src\main\java\UnidadPackage\UnidadBasica.java ---
+
+
+--- INICIO: \src\main\java\Casilla.java ---
+
+public class Casilla {
+}
+
+--- FIN: \src\main\java\Casilla.java ---
+
+
+--- INICIO: \src\main\java\Main.java ---
+import Builders.*;
+import Controladores.ControladorTurnos;
+import Controladores.ControladorTurnosTradicional;
+import Controladores.GestorMovimientos;
+import Controladores.GestorMovimientosBasico;
+import InterfazUsuario.InterfazConsola;
+import InterfazUsuario.InterfazUsuario;
+import Jugador.Jugador;
+import Mapa.Mapa;
+import Mapa.Celda;
+import MostrablePackage.Mostrable;
+import MostrablePackage.MostrableConsola;
+import UnidadPackage.Unidad;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+public class Main {
+        public static void main(String[] args) {
+            System.out.println("Hola, mundo!");
+            //inicializacion de instancias
+            InterfazUsuario inputsConsola = null;
+            try {
+                 inputsConsola = new InterfazConsola();
+            } catch (IOException e) {
+                System.err.println("Error al instanciar la interfaz de consola");
+                e.printStackTrace();
+                System.exit(1);
+            }
+            Mostrable mostrarConsola = new MostrableConsola();
+            MapaFactory mapaFactory = new MapaFactoryTexto();
+            IEjercitoFactory ejercitoFactory = new EjercitoFactoryTexto();
+            ProcesadorMapa procesadorMapa = new ProcesadorMapa(mapaFactory);
+
+            //obtener Datos iniciales
+
+            //Para Mapa
+            mostrarConsola.mostrarMensaje("Ingrese ruta al archivo inicial del mapa (CSV): ");
+            InputStream inputMapa = inputsConsola.pedirRutaArchivo();
+            Mapa mapa = procesadorMapa.procesarMapa(inputMapa);
+            //Para obtener Jugadores y Ejercito Inical:
+            mostrarConsola.mostrarMensaje("Ingrese ruta al archivo de los ejercitos (CSV): ");
+            InputStream inputEjercito = inputsConsola.pedirRutaArchivo();
+            List<Jugador> jugadores = ejercitoFactory.procesarEjecito(inputEjercito);
+            //TODO:logica de set up inicial (crear clase setup o hacerlo en este mismo archivo)
+
+            //Creacion de gestores
+            GestorMovimientos gestorMovimientos = new GestorMovimientosBasico();
+            ControladorTurnos controladorTurnos = new ControladorTurnosTradicional(jugadores);
+
+            mostrarConsola.mostrarMapa(mapa,null);
+            for (Jugador j: jugadores){
+                mostrarConsola.mostrarJugador(j);
+                List<Unidad> unidades = j.getUnidades();
+                for (Unidad u: unidades){
+                    mostrarConsola.mostrarUnidad(u);
+                }
+            }
+            setUpNombresJugadores(jugadores,inputsConsola);
+            setUpInicial(mapa,jugadores,mostrarConsola,inputsConsola);
+            //TODO:juego.iniciarPartida();
+        }
+
+    /**
+     * Matodo para settear los nombre iniciales de los jugadores del juego
+     * @param jugadores
+     * @param inputsConsola interfaz por la cula se puede pedir nombres a los usuarios
+     */
+    private static void setUpNombresJugadores(List<Jugador> jugadores, InterfazUsuario inputsConsola) {
+        for (Jugador jugador : jugadores) {
+            String nuevoNombre = inputsConsola.pedirNombreUsuario();
+            jugador.setNombre(nuevoNombre);
+        }
+    }
+
+    /**
+     * Metodo que setea inicialmente las unidades de los jugadores y deja el mapa listo para jugar
+     * @param mapa
+     * @param jugadores
+     * @param mostrarConsola
+     * @param inputsConsola
+     */
+    private static void setUpInicial(Mapa mapa, List<Jugador> jugadores, Mostrable mostrarConsola, InterfazUsuario inputsConsola) {
+        mostrarConsola.mostrarMensaje("--- INICIO DE COLOCACIÓN DE UNIDADES ---");
+
+        int i = 0;
+        for (Jugador jugadorActual : jugadores){
+            mostrarConsola.mostrarJugador(jugadorActual);
+            mostrarConsola.mostrarMapa(mapa,jugadorActual);
+            setUpUnidadesJugador(mapa,jugadorActual,mostrarConsola,inputsConsola,i);
+            i++;
+            mostrarConsola.mostrarMapa(mapa,jugadorActual);
+            }
+        mostrarConsola.mostrarMensaje("--- COLOCACIÓN FINALIZADA. COMIENZA LA PARTIDA. ---");
+        }
+
+    private static void setUpUnidadesJugador(Mapa mapa, Jugador jugadorActual, Mostrable mostrarConsola, InterfazUsuario inputsConsola,int indiceJugador) {
+        int anchoMapa = mapa.getAncho();
+        int limiteX = anchoMapa / 2;
+
+        for (Unidad unidad: jugadorActual.getUnidades()){
+            mostrarConsola.mostrarMensaje("Colocando unidad "+ getNombreUnidad(unidad));
+            mostrarConsola.mostrarUnidad(unidad);
+            Celda celdaSeleccionada = obtenerCelda(mapa,inputsConsola,jugadorActual,limiteX,mostrarConsola);
+            celdaSeleccionada.colocarUnidad(unidad);
+        }
+        }
+
+    private static Celda obtenerCelda(Mapa mapa, InterfazUsuario inputsConsola, Jugador jugadorActual, int limiteX, Mostrable mostrarConsola) {
+            //TODO: continuar metodo, debe solicitar una celda que este
+            // en la mitad que le corresponde a este jugador
+            return null;
+    }
+
+    private static String getNombreUnidad(Unidad unidad) {
+        String display = unidad.getDisplay();
+        return switch (display) {
+            case "L" -> "Lord";
+            case "U" -> "Unidad Basica";
+            default -> throw new IllegalArgumentException("Unidad no reconocida");
+        };
+    }
+}
+
+--- FIN: \src\main\java\Main.java ---
+
+
+--- INICIO: \pom.xml ---
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.grupo8.paradigmas</groupId>
+    <artifactId>TP2</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencies>
+
+        <dependency>
+            <groupId>org.jline</groupId>
+            <artifactId>jline</artifactId>
+            <version>3.27.0</version>
+        </dependency>
+    </dependencies>
+</project>
+
+--- FIN: \pom.xml ---
+
+
+--- INICIO: \README.md ---
+# TP2 - Paradigmas
+
+# Diagrama de Clases UML del Proyecto
+<img width="4096" height="381" alt="image" src="https://github.com/user-attachments/assets/faf46da0-7412-4bb0-bdad-279b787df5b9" />
+
+--- FIN: \README.md ---
+
+
